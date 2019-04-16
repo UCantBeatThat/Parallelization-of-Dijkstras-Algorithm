@@ -102,9 +102,9 @@ __global__ void updatePaths(Vertex *vertices, int *length, int *updateLength)
 
 
 
-void printShortestPath(int *array, int dest, int *req_path, int count)
+void printShortestPath(int *array, int src, int dest, int *req_path, int count)
 {
-	printf("Shortest Path to Vertex: %d is %d\nPATH: ", dest, array[dest]);
+	printf("Shortest Path from Vertex %d to %d is %d\nPATH: ", src, dest, array[dest]);
 	for(int i=count-1;i>=0;i--)
     {
         printf("%d-->", req_path[i]);
@@ -221,7 +221,7 @@ int main(void)
         temp = path[temp];
     }
     
-    printShortestPath(len, dest, req_path, count);
+    printShortestPath(len, root.title, dest, req_path, count);
 
 	printf("Running Time: %f ms\n", runningTime);
 
