@@ -44,6 +44,21 @@ __device__ __host__ int findEdge(Vertex u, Vertex v, Edge *edges, int *weights)
 }
 
 
+__global__ void initVertices(Vertex *vertices, Edge *edges, int* weights, int* length, int* updateLength, Vertex root){
+    
+    int i = threadIdx.x;
+    
+    if(vertices[i].title != root.title)
+		{
+			length[(int)vertices[i].title] = findEdge(root, vertices[i], edges, weights);
+			updateLength[vertices[i].title] = length[(int)vertices[i].title];		
+		}
+		else{
+			vertices[i].visited = TRUE;
+		}
+}
+
+
 __global__ void findVertex(Vertex *vertices, Edge *edges, int *weights, int *length, int *updateLength, int* path)
 {
 
@@ -65,13 +80,11 @@ __global__ void findVertex(Vertex *vertices, Edge *edges, int *weights, int *len
 				if(updateLength[v] > length[u] + weight)
 				{
 			        path[v] = u;
-					updateLength[v] = length[u] + weight;
+					    updateLength[v] = length[u] + weight;
 				}
 			}
 		}
-
 	}
-	
 }
 
 
@@ -145,12 +158,12 @@ int main(void)
 	cudaMalloc((void**)&d_C, size);
   	cudaMalloc((void**)&d_P, size);
 
-	Vertex root = {1, FALSE};
+	Vertex root = {7, FALSE};
 	root.visited = TRUE;
 	len[root.title] = 0;
 	updateLength[root.title] = 0;
 
-	int dest = 6;
+	int dest = 0;
 
 	int i = 0;
 	for(i = 0; i < V; i++)
@@ -173,26 +186,19 @@ int main(void)
 	cudaMemcpy(d_L, len, size, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_C, updateLength, size, cudaMemcpyHostToDevice);
   	cudaMemcpy(d_P, path, size, cudaMemcpyHostToDevice);
+    
+    
+ 	initVertices<<<1, V>>>(d_V, d_E, d_W, d_L, d_C, root);
 	
-	for(i = 0; i < V;i++)
-	{
-
-		if(vertices[i].title != root.title)
-		{
-			len[(int)vertices[i].title] = findEdge(root, vertices[i], edges, weights);
-			updateLength[vertices[i].title] = len[(int)vertices[i].title];		
-		}
-		else{
-			vertices[i].visited = TRUE;
-		}
-	}
+  	cudaMemcpy(len, d_L, size, cudaMemcpyDeviceToHost);
+  	cudaMemcpy(updateLength, d_C, size, cudaMemcpyDeviceToHost);
 
 	cudaEventRecord(timeStart, 0);
 	
 	cudaMemcpy(d_L, len, size, cudaMemcpyHostToDevice);
 	cudaMemcpy(d_C, updateLength, size, cudaMemcpyHostToDevice);
 	
-	for(i = 0; i < V; i++)
+	for(i = 1; i < V; i++)
 	{
 		findVertex<<<1, V>>>(d_V, d_E, d_W, d_L, d_C, d_P);
 		updatePaths<<<1,V>>>(d_V, d_L, d_C);
@@ -229,6 +235,7 @@ int main(void)
 	cudaFree(d_W);
 	cudaFree(d_L);
 	cudaFree(d_C);
+	cudaFree(d_P);
 	cudaEventDestroy(timeStart);
 	cudaEventDestroy(timeEnd);
 }
