@@ -6,8 +6,8 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-#define V 8
-#define E 11
+//#define V 9
+//#define E 14
 #define MAX_WEIGHT 1000000
 #define TRUE    1
 #define FALSE   0
@@ -80,7 +80,7 @@ __global__ void findVertex(Vertex *vertices, Edge *edges, int *weights, int *len
 				if(updateLength[v] > length[u] + weight)
 				{
 			        path[v] = u;
-					    updateLength[v] = length[u] + weight;
+					updateLength[v] = length[u] + weight;
 				}
 			}
 		}
@@ -125,12 +125,20 @@ int main(void)
   	int *path;
   	int *len, *updateLength;
 	
+	int V, E;
+
 	Vertex *d_V;
 	Edge *d_E;
 	int *d_W;
 	int *d_L;
 	int *d_C, *d_P;
 	
+	printf("Enter number of vertices: ");
+	scanf("%d", &V);
+
+	printf("Enter number of edges: ");
+	scanf("%d", &E);
+
 	int sizeV = sizeof(Vertex) * V;
 	int sizeE = sizeof(Edge) * E;
 	int size = V * sizeof(int);
@@ -148,8 +156,18 @@ int main(void)
 	len = (int *)malloc(size);
 	updateLength = (int *)malloc(size);
 
-	Edge ed[E] = {{0, 4}, {0, 6}, {0,2}, {4,6}, {4,7}, {0, 7}, {7, 3}, {3, 1}, {2,5}, {2, 1}, {5,3}};
-	int w[E] = {10, 90, 30, 20, 20, 50, 10, 20, 10, 10, 10};
+	Edge ed[E];
+	int w[E];
+	printf("Enter graph data (SRC_VERTEX DEST_VERTEX WEIGHT):");
+	for(int i=0;i<E;i++)
+	{
+		int u, v, wt;
+		scanf("%d %d %d", &u, &v, &wt);
+		ed[i] = {u, v};
+		w[i] = wt;
+	}
+	//Edge ed[E] = {{0, 1}, {0, 7}, {1, 7}, {1, 2}, {2, 8}, {2, 3}, {2, 5}, {3, 4}, {3, 5}, {4, 5}, {5, 6}, {6, 7}, {6, 8}, {7, 8}};
+	//int w[E] = {4, 8, 11, 8, 2, 7, 4, 9, 14, 10, 7, 1, 6, 7};
 	
 	cudaMalloc((void**)&d_V, sizeV);
 	cudaMalloc((void**)&d_E, sizeE);
@@ -158,12 +176,17 @@ int main(void)
 	cudaMalloc((void**)&d_C, size);
   	cudaMalloc((void**)&d_P, size);
 
-	Vertex root = {7, FALSE};
+  	int src;
+  	printf("Enter source vertex: ");
+  	scanf("%d", &src);
+	Vertex root = {src, FALSE};
 	root.visited = TRUE;
 	len[root.title] = 0;
 	updateLength[root.title] = 0;
 
-	int dest = 0;
+	int dest;
+	printf("Enter destination vertex: ");
+	scanf("%d", &dest);
 
 	int i = 0;
 	for(i = 0; i < V; i++)

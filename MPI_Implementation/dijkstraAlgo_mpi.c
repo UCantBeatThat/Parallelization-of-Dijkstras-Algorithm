@@ -126,15 +126,23 @@ int main(int argc, char** argv){
         printf("\n--------------------------------------\nNode = %d \tDistance = %d \n", dest_node, D[dest_node]);
         int temp;
         temp = dest_node;
-        printf("PATH:  %d ", dest_node);
+        printf("\nPATH: ");
+        int req_path[N];
+        int count = 0;
         while(all_paths[temp]!=-1){
-            printf(" <-- %d ", all_paths[temp]);
+        	req_path[count++] = all_paths[temp];
+            //printf(" <-- %d ", req_path[count-1]);
             temp = all_paths[temp];
         }
-        
+
+        for(int i=count-1;i>=0;i--){
+        	printf(" %d -->", req_path[i]);
+        }
+        printf(" %d ", dest_node);
+
         FILE *fin = fopen("output.txt", "a");
-        printf("\n--------------------------------------\n\nTIME ELAPSED: %lf\n\n",(t2-t1));
-        fprintf(fin, "%d\t| %lf\n",size, (t2-t1));
+        printf("\n--------------------------------------\n\nTIME ELAPSED: %lf ms\n\n",(t2-t1)*1000);
+        fprintf(fin, "%d\t| %lf\n",size, (t2-t1)*1000);
     }
 
     MPI_Finalize();

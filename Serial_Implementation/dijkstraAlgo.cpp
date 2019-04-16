@@ -11,6 +11,7 @@ int main(){
 	*/
 	int n,e;
 	cin>>n>>e;
+	double start, stop;
 	int** edges=new int*[n];
 	for(int i=0;i<n;i++){
 		edges[i]=new int[n];
@@ -37,6 +38,7 @@ int main(){
 	//cosidering 0 as the source vertex
 	distance[1]=0;
 	//traverse to all the vertices
+	start = clock();
 	for(int i=0;i<n-1;i++){
 		//we should select the vertex with the min distance and that should be unvisited as well
 		int best_distance=INT_MAX;		
@@ -62,7 +64,10 @@ int main(){
 			}
 		}
 	}
+	stop = clock();
 	for(int i=0;i<n;i++){
 		cout<<i<<" "<<distance[i]<<endl;
 	}
+
+	cout<<"TIME ELAPSED: "<<(stop-start)/(CLOCKS_PER_SEC)*1000<<" ms"<<endl;
 }
